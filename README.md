@@ -10,7 +10,7 @@ the repo back). The result is a static HTML cemetery with one tombstone per repo
 
 Built for the DEV Hacktoberfest Open-Source AI Challenge, Week 4: "Ghost in the Machine".
 
-> 🚧 Work in progress.
+![The cemetery of a real GitHub user: papel picado, a cantera tombstone with candles, and the calaverita next to it](docs/cemetery.png)
 
 ## Build
 
