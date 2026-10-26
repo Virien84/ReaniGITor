@@ -19,3 +19,6 @@ target/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Browser screenshots taken while designing
+.playwright-mcp/

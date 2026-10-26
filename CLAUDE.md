@@ -103,6 +103,18 @@ the start of a new session (after `/clear`):
   the model. Prompt tuning notes: couplets rhyme far better than ABAB in Spanish; telling
   the model "roast, not an elegy", banning solemn words and generic diagnoses
   ("stagnation") made it funnier. About 33 s per repo with `gemma4:e4b-it-qat`.
+- **Cemetery** (`cemetery` package): `Cemetery.render` writes `output/<user>/index.html`
+  (static, no JavaScript, CSP `default-src 'none'` with only inline styles, Google Fonts
+  and `media-src 'self'` allowed). Every repo/model string goes through `Cemetery.escape`;
+  repo links only when the URL matches `https://github.com/owner/repo`. CSS lives in
+  `src/main/resources/cemetery/cemetery.css` (not Maven-filtered) and is inlined.
+  `PapelPicado` draws the SVG banner (even-odd cut-outs). Design: Día de Muertos night,
+  plum `#1e1433`, cantera-pink stones, cempasúchil `#f2a20c`, rosa mexicano and turquoise
+  papel picado; Sancreek (display, stone names) + Alegreya (text, italic calaveritas);
+  graves alternate left/right along a marigold-petal path; stone height grows with years
+  dead; only motion is the candle flicker (off with reduced motion). `--redraw` rebuilds
+  the page from `graves.json` without GitHub or the model. Screenshots: serve the folder
+  on `127.0.0.1` (Playwright blocks `file:`) and save to `.playwright-mcp/` (git-ignored).
 - **Console**: `main` prints in the console's charset (UTF-8 when redirected), because Java
   17 uses Cp1252 on Windows and mangles accents.
 - **Config**: `Env` reads the environment, then `.env`; values are never printed.
