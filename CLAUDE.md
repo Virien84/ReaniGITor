@@ -79,6 +79,17 @@ the start of a new session (after `/clear`):
   (`run(args, out, err)` returns the exit code: 0 ok, 1 failure, 2 usage error, so it can be
   tested without `System.exit`). The version comes from the filtered
   `src/main/resources/reanigitor.properties`. JUnit 6 for tests.
+- **GitHub** (`github` package): `GitHubClient` is GET-only (one private `get` method; no
+  other HTTP verb exists in the code). It validates the username and `owner/repo` before
+  building URLs, cleans every text field with `Text.clean` (control and bidi characters
+  removed, length capped: README 3000, description 300, commit 200, issue 120 chars) and
+  turns 404/409 into "nothing there" and rate limits into a clear `GitHubException`.
+  `AbandonmentPolicy`: not a fork and no push for more than `--months` (default **12**);
+  `select` returns the longest dead first, at most `--max` (default **12**). Cost per run:
+  repo pages + up to 3 requests per buried repo (README, last commit, open issues, the last
+  one skipped when there are none), so 12 repos fit in the anonymous 60/hour.
+- **Config**: `Env` reads the environment, then `.env`; values are never printed.
+  `Options` parses the CLI. Tests use `FakeGitHub` (a local `HttpServer`), never the network.
 - `.env.example` lists the optional variables (no values). `.gitattributes` keeps `mvnw`
   with LF line endings.
 
@@ -105,8 +116,8 @@ the start of a new session (after `/clear`):
 
 ## Planned pipeline
 
-`GitHub user → list repos → pick the abandoned ones (no push in N months, threshold to
-decide) → gather the "remains" (README, language, stars, open issues, last commit message,
+`GitHub user → list repos → pick the abandoned ones (not a fork, no push in 12 months by
+default) → gather the "remains" (README, language, stars, open issues, last commit message,
 dates) → Gemma: autopsy + epitaph, calaverita, resurrection prophecy (JSON) → HTML
 cemetery → (optional) ElevenLabs: narration of each calaverita + ambient sound`.
 

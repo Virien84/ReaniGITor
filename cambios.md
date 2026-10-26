@@ -1,6 +1,5 @@
 ## CAMBIOS
 
-- Cliente de GitHub (solo lectura): listar los repos de un usuario, decidir el umbral de «abandonado» (p. ej. sin push en 12 meses) y reunir los «restos» de cada repo (README, lenguaje, estrellas, issues abiertas, último mensaje de commit, fechas).
 - Prompts y salida JSON validada con Gemma: autopsia (causa de la muerte + epitafio), calaverita literaria (opción español/inglés) y profecía de resurrección en 3 pasos. Afinarlos hasta que salgan graciosos.
 - Generar el cementerio en HTML estático (usar /frontend-design:frontend-design): una lápida por repo, velas y cempasúchil.
 - Probar con los repos del usuario (pedirle su usuario de GitHub).
@@ -27,3 +26,5 @@
   → `pom.xml` (Java 17, UTF-8, Jackson 2.22.4, JUnit 6.1.3; shade genera `target/reanigitor.jar` ejecutable), Maven Wrapper fijado a 3.10.0 (`mvnw`/`mvnw.cmd`) y CLI mínima `ReaniGITor` (`--help`, `--version`, valida el nombre de usuario de GitHub) con 5 tests en verde (TDD). `.gitignore` ya excluía `.env`, `output/` y `target/` (comprobado con `git check-ignore`); añadidos `.env.example` y `.gitattributes`. CLAUDE.md y README actualizados.
 - ✅ 26/10/2026 · Hacer push a https://github.com/Virien84/ReaniGITor (el repo ya existe, lo creó el usuario, y ya está añadido como `origin`).
   → `git push -u origin main`: `main` sigue a `origin/main` y es la rama por defecto en GitHub.
+- ✅ 26/10/2026 · Cliente de GitHub (solo lectura): listar los repos de un usuario, decidir el umbral de «abandonado» (p. ej. sin push en 12 meses) y reunir los «restos» de cada repo (README, lenguaje, estrellas, issues abiertas, último mensaje de commit, fechas).
+  → Rama `feature/github-client`. `GitHubClient` (solo GET, valida usuario y `owner/repo`, limpia y recorta todo el texto, errores claros de usuario inexistente y de límite de peticiones), `AbandonmentPolicy` (umbral: no es fork y sin push en **12 meses**, `--months`; los más antiguos primero, como mucho **12**, `--max`), `Remains` (README, último commit, hasta 5 issues/PR abiertas), `Env` (entorno y `.env`) y `Options`. La CLI imprime el censo de muertos. 34 tests en verde con un GitHub falso local; probado contra la API real con `octocat`.
