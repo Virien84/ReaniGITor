@@ -70,7 +70,17 @@ the start of a new session (after `/clear`):
      ask for them in chat. If one is pasted in chat, tell the user to rotate it.
    - Don't run anything that spends ElevenLabs credits until the user says yes.
 
-## Stack (decided, nothing built yet)
+## Stack (decided)
+
+- **Build**: `./mvnw package` (Maven Wrapper pinned to 3.10.0, so a global Maven is not
+  needed) builds and tests, and writes the runnable `target/reanigitor.jar`, with Jackson
+  shaded in. Run it with `java -jar target/reanigitor.jar <github-username>`.
+- **Layout**: package `io.github.virien84.reanigitor`; entry point `ReaniGITor`
+  (`run(args, out, err)` returns the exit code: 0 ok, 1 failure, 2 usage error, so it can be
+  tested without `System.exit`). The version comes from the filtered
+  `src/main/resources/reanigitor.properties`. JUnit 6 for tests.
+- `.env.example` lists the optional variables (no values). `.gitattributes` keeps `mvnw`
+  with LF line endings.
 
 - **Java 17** (Liberica JDK 17.0.14, `C:\Program Files\BellSoft\LibericaJDK-17`) +
   **Maven 3.10.0** (installed with `scoop install maven`; winget has no `Apache.Maven`).

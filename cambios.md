@@ -1,7 +1,6 @@
 ## CAMBIOS
 
 - Crear el repo público https://github.com/Virien84/ReaniGITor (lo hace el usuario o da permiso), añadirlo como `origin` y hacer push.
-- Esqueleto del proyecto Maven (Java 17), con `.gitignore` que excluya `.env` y la salida generada.
 - Cliente de GitHub (solo lectura): listar los repos de un usuario, decidir el umbral de «abandonado» (p. ej. sin push en 12 meses) y reunir los «restos» de cada repo (README, lenguaje, estrellas, issues abiertas, último mensaje de commit, fechas).
 - Prompts y salida JSON validada con Gemma: autopsia (causa de la muerte + epitafio), calaverita literaria (opción español/inglés) y profecía de resurrección en 3 pasos. Afinarlos hasta que salgan graciosos.
 - Generar el cementerio en HTML estático (usar /frontend-design:frontend-design): una lápida por repo, velas y cempasúchil.
@@ -25,3 +24,5 @@
   → winget no tiene `Apache.Maven`; Maven 3.10.0 instalado con `scoop install maven`. Corregido el `JAVA_HOME` de usuario, que apuntaba a un JDK 15 borrado, para que apunte al Liberica JDK 17. Ollama 0.40.6 arrancado; `gemma4:e4b-it-qat` ya estaba y devuelve JSON con `format` y `think=false` (~37 s la primera llamada). No hizo falta descargar nada.
 - ✅ 26/10/2026 · Decidir el nombre definitivo del proyecto y crear el repositorio (git + GitHub, licencia open source).
   → Nombre elegido: **ReaniGITor**. Repo git en `main` con licencia MIT, `README.md` inicial y `.gitignore` (excluye `.env`, `target/`, `output/`, `.claude/` y `.agents/`). El repo de GitHub no se pudo crear: el modo automático de Claude Code bloqueó `gh repo create --public`; queda pendiente en CAMBIOS. CLAUDE.md actualizado con el nombre y la sección Repository.
+- ✅ 26/10/2026 · Esqueleto del proyecto Maven (Java 17), con `.gitignore` que excluya `.env` y la salida generada.
+  → `pom.xml` (Java 17, UTF-8, Jackson 2.22.4, JUnit 6.1.3; shade genera `target/reanigitor.jar` ejecutable), Maven Wrapper fijado a 3.10.0 (`mvnw`/`mvnw.cmd`) y CLI mínima `ReaniGITor` (`--help`, `--version`, valida el nombre de usuario de GitHub) con 5 tests en verde (TDD). `.gitignore` ya excluía `.env`, `output/` y `target/` (comprobado con `git check-ignore`); añadidos `.env.example` y `.gitattributes`. CLAUDE.md y README actualizados.

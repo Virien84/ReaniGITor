@@ -12,6 +12,15 @@ Built for the DEV Hacktoberfest Open-Source AI Challenge, Week 4: "Ghost in the 
 
 > 🚧 Work in progress.
 
+## Build
+
+You need Java 17 or later. The Maven Wrapper downloads Maven for you.
+
+```sh
+./mvnw package                     # mvnw.cmd package on Windows
+java -jar target/reanigitor.jar --help
+```
+
 ## License
 
 [MIT](LICENSE)
