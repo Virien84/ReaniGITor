@@ -1,6 +1,6 @@
 ## CAMBIOS
 
-- Crear el repo público https://github.com/Virien84/ReaniGITor (lo hace el usuario o da permiso), añadirlo como `origin` y hacer push.
+- Hacer push a https://github.com/Virien84/ReaniGITor (el repo ya existe, lo creó el usuario, y ya está añadido como `origin`).
 - Cliente de GitHub (solo lectura): listar los repos de un usuario, decidir el umbral de «abandonado» (p. ej. sin push en 12 meses) y reunir los «restos» de cada repo (README, lenguaje, estrellas, issues abiertas, último mensaje de commit, fechas).
 - Prompts y salida JSON validada con Gemma: autopsia (causa de la muerte + epitafio), calaverita literaria (opción español/inglés) y profecía de resurrección en 3 pasos. Afinarlos hasta que salgan graciosos.
 - Generar el cementerio en HTML estático (usar /frontend-design:frontend-design): una lápida por repo, velas y cempasúchil.

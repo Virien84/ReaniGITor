@@ -26,9 +26,9 @@ Muertos, with open-weight models or open-source AI.
 
 ## Repository
 
-- Name: **ReaniGITor** (chosen by the user on 2026-10-26). Planned public GitHub repo:
-  https://github.com/Virien84/ReaniGITor (account `Virien84`, `gh` is logged in; not created
-  yet, see `cambios.md`). Branch
+- Name: **ReaniGITor** (chosen by the user on 2026-10-26). Public GitHub repo:
+  https://github.com/Virien84/ReaniGITor (account `Virien84`, `gh` is logged in), remote
+  `origin`. Branch
   `main`. MIT license (same as the Week 3 project).
 - Tracked: code, `README.md`, `LICENSE`, `CLAUDE.md`, `cambios.md`, `skills-lock.json`.
   Git-ignored: `.env`, `target/`, the generated `output/`, and `.claude/` and `.agents/`
