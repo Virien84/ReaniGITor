@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.virien84.reanigitor.wake.Lang;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 class OptionsTest {
@@ -30,6 +32,22 @@ class OptionsTest {
         assertTrue(e.getMessage().contains("--months"), e.getMessage());
         assertThrows(UsageException.class, () -> Options.parse("ghost", "--max", "many"));
         assertThrows(UsageException.class, () -> Options.parse("ghost", "--max"));
+    }
+
+    @Test
+    void languageModelAndOutputFolder() {
+        Options defaults = Options.parse("ghost");
+        assertEquals(Lang.EN, defaults.lang());
+        assertEquals("gemma4:e4b-it-qat", defaults.model());
+        assertEquals(Path.of("output"), defaults.out());
+
+        Options options = Options.parse("ghost", "--lang", "ES", "--model", "gemma4:e2b", "--out", "graves");
+        assertEquals(Lang.ES, options.lang());
+        assertEquals("gemma4:e2b", options.model());
+        assertEquals(Path.of("graves"), options.out());
+
+        assertThrows(UsageException.class, () -> Options.parse("ghost", "--lang", "fr"));
+        assertThrows(UsageException.class, () -> Options.parse("ghost", "--model", "x y"));
     }
 
     @Test

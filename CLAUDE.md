@@ -88,6 +88,23 @@ the start of a new session (after `/clear`):
   `select` returns the longest dead first, at most `--max` (default **12**). Cost per run:
   repo pages + up to 3 requests per buried repo (README, last commit, open issues, the last
   one skipped when there are none), so 12 repos fit in the anonymous 60/hour.
+- **Model** (`ollama` package): `OllamaClient` implements `JsonChat` and refuses any host
+  that is not loopback. It calls `/api/chat` with a system + user message, `format` = JSON
+  schema, `think=false`, `stream=false`, no `tools`, `temperature` 0.75, `num_ctx` 4096,
+  `num_predict` 700. `requireModel()` checks `/api/tags` first, with "ollama serve" /
+  "ollama pull" hints.
+- **Wake** (`wake` package): `Prompts` (system prompts for the coroner and the poet; the
+  evidence goes in one `<repo>…</repo>` block, with any `<repo>` tag inside the data
+  neutralized and the README cut to 1500 chars). `Undertaker` makes 2 calls per repo
+  (autopsy = cause of death + epitaph + 3 resurrection steps; calaverita = title + 8
+  verses in couplets, `--lang en|es`), validates and cleans the answers, retries once and
+  then uses `Fallbacks` (stock texts), so a grave never lacks text. `Graveyard` is saved as
+  `output/<user>/graves.json` (Jackson + JavaTimeModule) so the HTML can be redrawn without
+  the model. Prompt tuning notes: couplets rhyme far better than ABAB in Spanish; telling
+  the model "roast, not an elegy", banning solemn words and generic diagnoses
+  ("stagnation") made it funnier. About 33 s per repo with `gemma4:e4b-it-qat`.
+- **Console**: `main` prints in the console's charset (UTF-8 when redirected), because Java
+  17 uses Cp1252 on Windows and mangles accents.
 - **Config**: `Env` reads the environment, then `.env`; values are never printed.
   `Options` parses the CLI. Tests use `FakeGitHub` (a local `HttpServer`), never the network.
 - `.env.example` lists the optional variables (no values). `.gitattributes` keeps `mvnw`
