@@ -38,6 +38,11 @@ class AbandonmentPolicyTest {
     }
 
     @Test
+    void theProfileReadmeRepoIsNotAProjectToBury() {
+        assertFalse(policy.isAbandoned(repo("Ghost", "2010-01-01T00:00:00Z", false)));
+    }
+
+    @Test
     void selectsTheLongestDeadFirstUpToTheLimit() {
         List<Repo> repos = List.of(
                 repo("recent-dead", "2024-06-01T00:00:00Z", false),

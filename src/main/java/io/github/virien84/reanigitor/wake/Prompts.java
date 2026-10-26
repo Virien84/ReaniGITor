@@ -46,7 +46,9 @@ public final class Prompts {
                 Each step starts with a verb and is genuinely useful for THIS repo (answer a \
                 named issue, update its stack, finish a feature its README promised...), with \
                 a pinch of ritual humor (candles, marigolds, offerings).
-                Never contradict the evidence and do not invent facts about the author.\
+                Never contradict the evidence and do not invent facts about the author. You only \
+                see metadata, not the code: never claim the code is missing, broken or unfinished \
+                unless the evidence says so. A repo can work fine and still be dead of abandonment.\
                 """.formatted(UNTRUSTED);
     }
 

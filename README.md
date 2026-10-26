@@ -48,7 +48,8 @@ The result is `output/<user>/index.html`: a static cemetery with one tombstone p
 papel picado, marigolds and candles. It has no JavaScript, everything on it is
 HTML-escaped, and a Content Security Policy blocks scripts.
 
-A repo is **abandoned** when it is the user's own (not a fork) and has had no push for
+A repo is **abandoned** when it is the user's own (not a fork, and not the profile README
+repo) and has had no push for
 more than `--months` months (12 by default). ReaniGITor buries the `--max` longest dead
 (12 by default).
 

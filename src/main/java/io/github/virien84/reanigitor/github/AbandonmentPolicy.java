@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Decides which repos are dead: the user's own repos (not forks) with no push for more than a
- * number of months.
+ * Decides which repos are dead: the user's own repos with no push for more than a number of
+ * months. Forks and the profile README repo (named like its owner) are never buried.
  */
 public final class AbandonmentPolicy {
 
@@ -29,7 +29,12 @@ public final class AbandonmentPolicy {
 
     public boolean isAbandoned(Repo repo) {
         Instant last = repo.lastSignOfLife();
-        return !repo.fork() && last != null && last.isBefore(cutoff);
+        return !repo.fork() && !isProfileReadme(repo) && last != null && last.isBefore(cutoff);
+    }
+
+    private static boolean isProfileReadme(Repo repo) {
+        String owner = repo.fullName().substring(0, Math.max(0, repo.fullName().indexOf('/')));
+        return repo.name().equalsIgnoreCase(owner);
     }
 
     /** The abandoned repos, longest dead first, at most {@code max} of them. */
