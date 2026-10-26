@@ -43,6 +43,9 @@ class OptionsTest {
         assertEquals(Path.of("output"), defaults.out());
         assertFalse(defaults.redraw());
         assertTrue(Options.parse("ghost", "--redraw").redraw());
+        Options narrate = Options.parse("ghost", "--narrate", "--dry-run");
+        assertTrue(narrate.narrate() && narrate.dryRun());
+        assertThrows(UsageException.class, () -> Options.parse("ghost", "--dry-run"));
 
         Options options = Options.parse("ghost", "--lang", "ES", "--model", "gemma4:e2b", "--out", "graves");
         assertEquals(Lang.ES, options.lang());

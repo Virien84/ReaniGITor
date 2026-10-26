@@ -11,11 +11,14 @@ import io.github.virien84.reanigitor.wake.Calaverita;
 import io.github.virien84.reanigitor.wake.Grave;
 import io.github.virien84.reanigitor.wake.Graveyard;
 import io.github.virien84.reanigitor.wake.Lang;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class CemeteryTest {
 
@@ -87,6 +90,33 @@ class CemeteryTest {
     void anEmptyCemeteryInvitesToComeBack() {
         String html = Cemetery.render(graveyard());
         assertTrue(html.contains("No abandoned repos"), html);
+    }
+
+    @Test
+    void addsPlayersOnlyForTheAudioThatExists(@TempDir Path dir) throws Exception {
+        Graveyard graveyard = graveyard(
+                grave("spoken", "2020-01-01T00:00:00Z", "https://github.com/ghost/spoken", "x", false),
+                grave("silent", "2020-01-01T00:00:00Z", "https://github.com/ghost/silent", "x", false));
+        Path audio = Files.createDirectories(dir.resolve("audio"));
+        Files.write(audio.resolve("spoken.mp3"), new byte[] {1});
+
+        String html = Files.readString(Cemetery.write(graveyard, dir));
+
+        assertTrue(html.contains("src=\"audio/spoken.mp3\""), html);
+        assertFalse(html.contains("audio/silent.mp3"), html);
+        assertFalse(html.contains("ambience.mp3"), html);
+        assertFalse(html.contains("autoplay"), "nothing plays on its own");
+
+        Files.write(audio.resolve("ambience.mp3"), new byte[] {1});
+        html = Files.readString(Cemetery.write(graveyard, dir));
+        assertTrue(html.contains("src=\"audio/ambience.mp3\""), html);
+    }
+
+    @Test
+    void withoutAudioThereAreNoPlayers() {
+        String html = Cemetery.render(graveyard(
+                grave("tomb", "2020-01-01T00:00:00Z", "https://github.com/ghost/tomb", "x", false)));
+        assertFalse(html.contains("<audio"), html);
     }
 
     @Test

@@ -38,6 +38,8 @@ java -jar target/reanigitor.jar <github-username> [options]
 | `--model NAME` | `gemma4:e4b-it-qat` | any local Ollama model |
 | `--out DIR` | `output` | where `<user>/graves.json` and `<user>/index.html` go |
 | `--redraw` | | redraw `index.html` from the saved `graves.json`, without GitHub or the model |
+| `--narrate` | | optional: record the calaveritas and a graveyard ambience with ElevenLabs |
+| `--dry-run` | | with `--narrate`: check the requests without sending them |
 
 For each repo the local model writes an autopsy (cause of death, epitaph and a three-step
 resurrection prophecy) and a calaverita. It answers in JSON that must match a schema; the
@@ -47,6 +49,21 @@ and treated as untrusted evidence, never as instructions.
 The result is `output/<user>/index.html`: a static cemetery with one tombstone per repo,
 papel picado, marigolds and candles. It has no JavaScript, everything on it is
 HTML-escaped, and a Content Security Policy blocks scripts.
+
+### Optional: hear the calaveritas
+
+Everything above runs offline with open models. If you also want a ghostly voice reading
+each calaverita, ReaniGITor can record them with [ElevenLabs](https://elevenlabs.io) (a
+cloud service, so it is strictly optional):
+
+```sh
+npx -y @elevenlabs/cli@latest onboard init      # once: signs in and stores ELEVENLABS_API_KEY
+java -jar target/reanigitor.jar <github-username> --narrate --dry-run   # free check
+java -jar target/reanigitor.jar <github-username> --narrate             # spends credits
+```
+
+Only the calaveritas (text the local model already wrote) are sent, never repo data. Files
+already recorded are never recorded again.
 
 A repo is **abandoned** when it is the user's own (not a fork, and not the profile README
 repo) and has had no push for

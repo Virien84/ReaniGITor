@@ -7,7 +7,8 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 /** Parsed command-line options. */
-public record Options(String user, int months, int max, Lang lang, String model, Path out, boolean redraw) {
+public record Options(String user, int months, int max, Lang lang, String model, Path out, boolean redraw,
+        boolean narrate, boolean dryRun) {
 
     static final int DEFAULT_MONTHS = 12;
     static final int DEFAULT_MAX = 12;
@@ -24,6 +25,8 @@ public record Options(String user, int months, int max, Lang lang, String model,
         String model = OllamaClient.DEFAULT_MODEL;
         Path out = DEFAULT_OUT;
         boolean redraw = false;
+        boolean narrate = false;
+        boolean dryRun = false;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch (arg) {
@@ -44,6 +47,8 @@ public record Options(String user, int months, int max, Lang lang, String model,
                 }
                 case "--out" -> out = Path.of(value(arg, args, ++i));
                 case "--redraw" -> redraw = true;
+                case "--narrate" -> narrate = true;
+                case "--dry-run" -> dryRun = true;
                 default -> {
                     if (arg.startsWith("-")) {
                         throw new UsageException("Unknown option: " + arg);
@@ -61,7 +66,10 @@ public record Options(String user, int months, int max, Lang lang, String model,
         if (user == null) {
             throw new UsageException("Missing the GitHub username");
         }
-        return new Options(user, months, max, lang, model, out, redraw);
+        if (dryRun && !narrate) {
+            throw new UsageException("--dry-run only works with --narrate");
+        }
+        return new Options(user, months, max, lang, model, out, redraw, narrate, dryRun);
     }
 
     private static String value(String option, String[] args, int index) {

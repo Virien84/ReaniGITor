@@ -2,6 +2,7 @@ package io.github.virien84.reanigitor.cemetery;
 
 import io.github.virien84.reanigitor.github.Remains;
 import io.github.virien84.reanigitor.github.Repo;
+import io.github.virien84.reanigitor.narrate.Narrator;
 import io.github.virien84.reanigitor.wake.Grave;
 import io.github.virien84.reanigitor.wake.Graveyard;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -36,6 +38,10 @@ public final class Cemetery {
     private static final Pattern GITHUB_URL = Pattern.compile("https://github\\.com/[A-Za-z0-9-]+/[A-Za-z0-9._-]+");
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 
+    private static final String AMBIENCE_PLAYER = "<figure class=\"ambience\"><figcaption>"
+            + "Hear the cemetery at night</figcaption><audio controls loop preload=\"none\" src=\""
+            + Narrator.AUDIO_DIR + "/" + Narrator.AMBIENCE + "\"></audio></figure>\n";
+
     static final int MIN_STONE = 240;
     static final int MAX_STONE = 420;
     static final int STONE_PER_YEAR = 18;
@@ -43,14 +49,23 @@ public final class Cemetery {
     private Cemetery() {
     }
 
+    /** Writes {@code index.html} in {@code dir}, with players for the MP3s found in {@code dir/audio}. */
     public static Path write(Graveyard graveyard, Path dir) throws IOException {
         Files.createDirectories(dir);
+        Path audio = dir.resolve(Narrator.AUDIO_DIR);
         Path file = dir.resolve(FILE_NAME);
-        Files.writeString(file, render(graveyard), StandardCharsets.UTF_8);
+        Files.writeString(file, render(graveyard, name -> Files.isRegularFile(audio.resolve(name))),
+                StandardCharsets.UTF_8);
         return file;
     }
 
+    /** The page without any audio. */
     public static String render(Graveyard graveyard) {
+        return render(graveyard, name -> false);
+    }
+
+    /** @param hasAudio whether the {@code audio/} folder next to the page has this file */
+    static String render(Graveyard graveyard, Predicate<String> hasAudio) {
         String user = escape(graveyard.user());
         StringBuilder html = new StringBuilder(32_000);
         html.append("""
@@ -74,8 +89,9 @@ public final class Cemetery {
                 %s
                 <h1>Here lie the repos of <span class="user">%s</span></h1>
                 <p class="lede">%s</p>
-                </header>
-                """.formatted(CSP, user, user, escape(FONTS), css(), PapelPicado.svg(), user, lede(graveyard)));
+                %s</header>
+                """.formatted(CSP, user, user, escape(FONTS), css(), PapelPicado.svg(), user, lede(graveyard),
+                hasAudio.test(Narrator.AMBIENCE) ? AMBIENCE_PLAYER : ""));
 
         if (graveyard.graves().isEmpty()) {
             html.append("<main class=\"empty\"><p>No abandoned repos. Every repo of ")
@@ -86,7 +102,7 @@ public final class Cemetery {
         } else {
             html.append("<main class=\"path\">\n");
             for (Grave grave : graveyard.graves()) {
-                tomb(html, grave, graveyard.dugAt());
+                tomb(html, grave, graveyard.dugAt(), hasAudio);
             }
             html.append("</main>\n");
         }
@@ -113,7 +129,7 @@ public final class Cemetery {
                 + ", and maybe bring one back from the dead.";
     }
 
-    private static void tomb(StringBuilder html, Grave grave, Instant dugAt) {
+    private static void tomb(StringBuilder html, Grave grave, Instant dugAt, Predicate<String> hasAudio) {
         Remains remains = grave.remains();
         Repo repo = remains.repo();
         html.append("<article class=\"grave\" id=\"grave-").append(escape(repo.name()))
@@ -131,7 +147,15 @@ public final class Cemetery {
         for (String verse : grave.calaverita().verses()) {
             html.append("<span>").append(escape(verse)).append("</span>");
         }
-        html.append("</p>\n</section>\n");
+        html.append("</p>\n");
+        String audio = Narrator.fileName(repo.name());
+        if (hasAudio.test(audio)) {
+            html.append("<audio class=\"voice\" controls preload=\"none\" src=\"")
+                    .append(Narrator.AUDIO_DIR).append('/').append(escape(audio))
+                    .append("\" aria-label=\"Listen to the calaverita of ").append(escape(repo.name()))
+                    .append("\"></audio>\n");
+        }
+        html.append("</section>\n");
 
         html.append("<section>\n<h3>Cause of death</h3>\n<p>")
                 .append(escape(grave.autopsy().causeOfDeath())).append("</p>\n</section>\n");
