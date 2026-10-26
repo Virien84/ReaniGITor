@@ -5,14 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.virien84.reanigitor.cemetery.Cemetery;
 import io.github.virien84.reanigitor.github.FakeGitHub;
 import io.github.virien84.reanigitor.github.GitHubClientTest;
+import io.github.virien84.reanigitor.narrate.AudioMaker;
 import io.github.virien84.reanigitor.ollama.JsonChat;
 import io.github.virien84.reanigitor.ollama.OllamaException;
 import io.github.virien84.reanigitor.wake.Graveyard;
 import io.github.virien84.reanigitor.wake.Lang;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,7 +23,10 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -91,14 +97,82 @@ class ReaniGITorTest {
         }
     };
 
+    /** The ElevenLabs key the run sees, and what the fake studio was asked to do. */
+    private String elevenLabsKey;
+    private final List<String> studioCalls = new ArrayList<>();
+
+    private final AudioMaker studio = new AudioMaker() {
+        @Override
+        public void speech(ObjectNode body, Path file) throws IOException {
+            studioCalls.add("speech " + file.getFileName());
+            Files.write(file, new byte[] {1});
+        }
+
+        @Override
+        public void soundEffect(ObjectNode body, Path file) throws IOException {
+            studioCalls.add("sfx " + file.getFileName());
+            Files.write(file, new byte[] {1});
+        }
+    };
+
     private int runAgainst(FakeGitHub github, String... args) {
+        return runAgainst(github, model -> MODEL, args);
+    }
+
+    private int runAgainst(FakeGitHub github, Function<String, JsonChat> models, String... args) {
         String[] withOut = Arrays.copyOf(args, args.length + 2);
         withOut[args.length] = "--out";
         withOut[args.length + 1] = outDir.toString();
         return ReaniGITor.run(withOut,
                 new PrintStream(out, true, StandardCharsets.UTF_8),
                 new PrintStream(err, true, StandardCharsets.UTF_8),
-                github.baseUri(), null, NOW, model -> MODEL);
+                new ReaniGITor.Services(github.baseUri(), null, NOW, models, elevenLabsKey, (dryRun, key) -> {
+                    studioCalls.add("open dryRun=" + dryRun + " key=" + key);
+                    return studio;
+                }));
+    }
+
+    @Test
+    void narratesTheSavedCalaveritasAndAddsPlayers() throws Exception {
+        try (FakeGitHub github = new FakeGitHub()) {
+            github.on(REPOS, 200, "[" + GitHubClientTest.repoJson("tomb", "2020-01-01T00:00:00Z") + "]");
+            assertEquals(0, runAgainst(github, "ghost"));
+            int requests = github.requests.size();
+            elevenLabsKey = "k";
+
+            assertEquals(0, runAgainst(github, "ghost", "--narrate"));
+
+            assertEquals(List.of("open dryRun=false key=k", "speech tomb.mp3", "sfx ambience.mp3"), studioCalls);
+            assertEquals(requests, github.requests.size(), "narration never calls GitHub");
+            String html = Files.readString(outDir.resolve("ghost").resolve(Cemetery.FILE_NAME));
+            assertTrue(html.contains("audio/tomb.mp3"), html);
+        }
+    }
+
+    @Test
+    void narrationWithoutAKeySaysHowToGetOne() throws Exception {
+        try (FakeGitHub github = new FakeGitHub()) {
+            github.on(REPOS, 200, "[" + GitHubClientTest.repoJson("tomb", "2020-01-01T00:00:00Z") + "]");
+            assertEquals(0, runAgainst(github, "ghost"));
+
+            assertEquals(1, runAgainst(github, "ghost", "--narrate"));
+
+            assertTrue(err().contains("onboard init"), err());
+            assertTrue(studioCalls.isEmpty(), "nothing is sent without a key");
+        }
+    }
+
+    @Test
+    void aDryRunNeedsNoKeyAndRecordsNothing() throws Exception {
+        try (FakeGitHub github = new FakeGitHub()) {
+            github.on(REPOS, 200, "[" + GitHubClientTest.repoJson("tomb", "2020-01-01T00:00:00Z") + "]");
+            assertEquals(0, runAgainst(github, "ghost"));
+
+            assertEquals(0, runAgainst(github, "ghost", "--narrate", "--dry-run"));
+
+            assertEquals("open dryRun=true key=null", studioCalls.get(0));
+            assertTrue(out().contains("nothing is sent"), out());
+        }
     }
 
     @Test
@@ -148,12 +222,9 @@ class ReaniGITorTest {
         try (FakeGitHub github = new FakeGitHub()) {
             github.on(REPOS, 200, "[" + GitHubClientTest.repoJson("tomb", "2020-01-01T00:00:00Z") + "]");
 
-            int exit = ReaniGITor.run(new String[] {"ghost", "--out", outDir.toString()},
-                    new PrintStream(out, true, StandardCharsets.UTF_8),
-                    new PrintStream(err, true, StandardCharsets.UTF_8),
-                    github.baseUri(), null, NOW, model -> {
-                        throw new OllamaException("Start it with: ollama serve");
-                    });
+            int exit = runAgainst(github, model -> {
+                throw new OllamaException("Start it with: ollama serve");
+            }, "ghost");
 
             assertEquals(1, exit);
             assertTrue(err().contains("ollama serve"), err());

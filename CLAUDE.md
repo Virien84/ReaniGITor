@@ -118,6 +118,17 @@ the start of a new session (after `/clear`):
   dead; only motion is the candle flicker (off with reduced motion). `--redraw` rebuilds
   the page from `graves.json` without GitHub or the model. Screenshots: serve the folder
   on `127.0.0.1` (Playwright blocks `file:`) and save to `.playwright-mcp/` (git-ignored).
+- **Narration** (`narrate` package, optional): `--narrate` reads `graves.json` and makes
+  `output/<user>/audio/<repo>.mp3` (each calaverita, `eleven_v4`, voice George, starts with
+  `[whispers]` and ends with `[laughs]`, `old_radio` filter + `hall` reverb, the
+  calaverita's `language_code`) and `audio/ambience.mp3` (22 s looping graveyard sound,
+  `eleven_text_to_sound_v2`), then redraws the page with players (no autoplay). Only the
+  calaverita title and verses are sent, never repo data or the autopsy. Existing files are
+  skipped (no double spending). `ElevenLabsCli` runs the official CLI pinned to
+  `@elevenlabs/cli@1.7.1` with the JSON body on **stdin** (`--json -`), never the text on
+  the command line (on Windows `npx.cmd` goes through `cmd.exe`). `--dry-run` passes the
+  CLI's `--dry-run`: validates without a key and without spending. The key comes from the
+  environment or `.env` and is handed to the CLI process environment only.
 - **Console**: `main` prints in the console's charset (UTF-8 when redirected), because Java
   17 uses Cp1252 on Windows and mangles accents.
 - **Config**: `Env` reads the environment, then `.env`; values are never printed.

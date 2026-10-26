@@ -6,6 +6,9 @@ import io.github.virien84.reanigitor.github.GitHubClient;
 import io.github.virien84.reanigitor.github.GitHubException;
 import io.github.virien84.reanigitor.github.Remains;
 import io.github.virien84.reanigitor.github.Repo;
+import io.github.virien84.reanigitor.narrate.AudioMaker;
+import io.github.virien84.reanigitor.narrate.ElevenLabsCli;
+import io.github.virien84.reanigitor.narrate.Narrator;
 import io.github.virien84.reanigitor.ollama.JsonChat;
 import io.github.virien84.reanigitor.ollama.OllamaClient;
 import io.github.virien84.reanigitor.ollama.OllamaException;
@@ -29,7 +32,9 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /** Command-line entry point: holds a Día de los Muertos wake for a user's abandoned repos. */
@@ -53,6 +58,10 @@ public final class ReaniGITor {
               --out DIR      output folder (default output)
               --redraw       draw the cemetery again from the saved graves.json,
                              without calling GitHub or the model
+              --narrate      optional: record the calaveritas and a graveyard ambience
+                             with ElevenLabs (needs ELEVENLABS_API_KEY; spends credits;
+                             files already recorded are skipped)
+              --dry-run      with --narrate: check the requests without sending them
 
             GITHUB_TOKEN (environment or .env) is optional: it raises the GitHub API
             limit from 60 to 5,000 requests per hour.
@@ -79,8 +88,22 @@ public final class ReaniGITor {
             out.println("ReaniGITor " + version());
             return OK;
         }
-        return run(args, out, err, GitHubClient.DEFAULT_API, Env.load().get("GITHUB_TOKEN"),
-                Clock.systemUTC(), ReaniGITor::localModel);
+        Env env = Env.load();
+        return run(args, out, err, new Services(GitHubClient.DEFAULT_API, env.get("GITHUB_TOKEN"),
+                Clock.systemUTC(), ReaniGITor::localModel, env.get("ELEVENLABS_API_KEY"),
+                (dryRun, key) -> new ElevenLabsCli(dryRun,
+                        key == null ? Map.of() : Map.of("ELEVENLABS_API_KEY", key))));
+    }
+
+    /**
+     * Everything the run talks to, so tests can swap it.
+     *
+     * @param models  opens the model by name, failing with an {@link OllamaException} when it is
+     *                not available
+     * @param studios makes the ElevenLabs audio maker from (dry run, API key)
+     */
+    record Services(URI githubApi, String githubToken, Clock clock, Function<String, JsonChat> models,
+            String elevenLabsKey, BiFunction<Boolean, String, AudioMaker> studios) {
     }
 
     private static JsonChat localModel(String model) {
@@ -89,12 +112,7 @@ public final class ReaniGITor {
         return ollama;
     }
 
-    /**
-     * @param models opens the model by name, failing with an {@link OllamaException} when it is
-     *               not available
-     */
-    static int run(String[] args, PrintStream out, PrintStream err, URI githubApi, String githubToken,
-            Clock clock, Function<String, JsonChat> models) {
+    static int run(String[] args, PrintStream out, PrintStream err, Services services) {
         Options options;
         try {
             options = Options.parse(args);
@@ -106,11 +124,15 @@ public final class ReaniGITor {
             return USAGE_ERROR;
         }
         Path dir = options.out().resolve(options.user());
+        if (options.narrate()) {
+            return narrate(options, dir, services, out, err);
+        }
         if (options.redraw()) {
             return redraw(dir, out, err);
         }
+        Clock clock = services.clock();
         try {
-            GitHubClient github = new GitHubClient(githubApi, githubToken);
+            GitHubClient github = new GitHubClient(services.githubApi(), services.githubToken());
             AbandonmentPolicy policy = new AbandonmentPolicy(options.months(), clock);
 
             out.printf("Exhuming %s's repos (abandoned = no push in %d months)...%n",
@@ -127,7 +149,7 @@ public final class ReaniGITor {
                 out.printf("Burying the %d longest dead.%n", chosen.size());
             }
 
-            Undertaker undertaker = new Undertaker(models.apply(options.model()), options.lang(), clock);
+            Undertaker undertaker = new Undertaker(services.models().apply(options.model()), options.lang(), clock);
             out.printf("The coroner is %s, running locally. This takes a while.%n", options.model());
             List<Grave> graves = new ArrayList<>();
             for (int i = 0; i < chosen.size(); i++) {
@@ -151,6 +173,42 @@ public final class ReaniGITor {
             return FAILURE;
         } catch (IOException e) {
             err.println("Could not write the graveyard: " + e.getMessage());
+            return FAILURE;
+        }
+    }
+
+    private static int narrate(Options options, Path dir, Services services, PrintStream out, PrintStream err) {
+        Path file = dir.resolve(Graveyard.FILE_NAME);
+        if (!Files.isRegularFile(file)) {
+            err.println("There is no " + file + " to narrate. Run it once without --narrate.");
+            return FAILURE;
+        }
+        if (services.elevenLabsKey() == null && !options.dryRun()) {
+            err.println("Narration needs ELEVENLABS_API_KEY (in the environment or .env). Set it up with:");
+            err.println("  npx -y @elevenlabs/cli@latest onboard init");
+            err.println("or add --dry-run to check the requests without sending them.");
+            return FAILURE;
+        }
+        try {
+            Graveyard graveyard = Graveyard.read(file);
+            int characters = graveyard.graves().stream()
+                    .mapToInt(g -> g.calaverita().title().length()
+                            + g.calaverita().verses().stream().mapToInt(String::length).sum())
+                    .sum();
+            out.printf("%s %d calaveritas (about %d characters) and one ambience track with ElevenLabs.%n",
+                    options.dryRun() ? "Dry run, nothing is sent: checking" : "Recording",
+                    graveyard.graves().size(), characters);
+            AudioMaker studio = services.studios().apply(options.dryRun(), services.elevenLabsKey());
+            int made = new Narrator(studio, out).narrate(graveyard, dir);
+            if (options.dryRun()) {
+                out.printf("%d requests are valid. Run without --dry-run to record them.%n", made);
+                return OK;
+            }
+            Path page = Cemetery.write(graveyard, dir);
+            out.printf("Recorded %d files. Open the cemetery: %s%n", made, page.toAbsolutePath());
+            return OK;
+        } catch (IOException e) {
+            err.println("Could not narrate the cemetery: " + e.getMessage());
             return FAILURE;
         }
     }

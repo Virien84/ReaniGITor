@@ -274,6 +274,22 @@ a:focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; borde
   font-style: italic;
 }
 
+/* Players appear only when the optional narration was recorded, and only play when clicked. */
+audio { display: block; width: 100%; max-width: 22rem; height: 40px; }
+audio:focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; }
+
+.voice { margin-top: 1rem; }
+
+.ambience {
+  margin: 1.6rem auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
 .empty {
   max-width: 30em;
   margin: 3rem auto;
