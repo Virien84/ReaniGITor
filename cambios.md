@@ -1,6 +1,5 @@
 ## CAMBIOS
 
-- Prompts y salida JSON validada con Gemma: autopsia (causa de la muerte + epitafio), calaverita literaria (opción español/inglés) y profecía de resurrección en 3 pasos. Afinarlos hasta que salgan graciosos.
 - Generar el cementerio en HTML estático (usar /frontend-design:frontend-design): una lápida por repo, velas y cempasúchil.
 - Probar con los repos del usuario (pedirle su usuario de GitHub).
 - (Opcional) ElevenLabs: crear cuenta y reclamar créditos en hacktoberfest.com/my, configurar la key con `onboard init`, narrar cada calaverita con voz espectral (`[whispers]`, filtro `old_radio`, reverberación) y sonido ambiente de cementerio. Pedir permiso antes de gastar créditos.
@@ -28,3 +27,5 @@
   → `git push -u origin main`: `main` sigue a `origin/main` y es la rama por defecto en GitHub.
 - ✅ 26/10/2026 · Cliente de GitHub (solo lectura): listar los repos de un usuario, decidir el umbral de «abandonado» (p. ej. sin push en 12 meses) y reunir los «restos» de cada repo (README, lenguaje, estrellas, issues abiertas, último mensaje de commit, fechas).
   → Rama `feature/github-client`. `GitHubClient` (solo GET, valida usuario y `owner/repo`, limpia y recorta todo el texto, errores claros de usuario inexistente y de límite de peticiones), `AbandonmentPolicy` (umbral: no es fork y sin push en **12 meses**, `--months`; los más antiguos primero, como mucho **12**, `--max`), `Remains` (README, último commit, hasta 5 issues/PR abiertas), `Env` (entorno y `.env`) y `Options`. La CLI imprime el censo de muertos. 34 tests en verde con un GitHub falso local; probado contra la API real con `octocat`.
+- ✅ 26/10/2026 · Prompts y salida JSON validada con Gemma: autopsia (causa de la muerte + epitafio), calaverita literaria (opción español/inglés) y profecía de resurrección en 3 pasos. Afinarlos hasta que salgan graciosos.
+  → Rama `feature/gemma-wake`. `OllamaClient` (solo localhost, esquema JSON en `format`, `think=false`, sin herramientas), `Prompts` (evidencias en un bloque `<repo>` con las etiquetas neutralizadas), `Undertaker` (2 llamadas por repo, validación, un reintento y textos de reserva) y `graves.json` para no tener que regenerar. Opciones `--lang en|es`, `--model` y `--out`. Afinado con 4 tandas reales sobre `octocat`: pareados en lugar de ABAB (mucha mejor rima en español), «roast, not an elegy», palabras solemnes vetadas y diagnósticos concretos en vez de «stagnation». ~33 s por repo. Arreglados los acentos en la consola de Windows. 52 tests en verde.

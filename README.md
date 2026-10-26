@@ -23,9 +23,25 @@ java -jar target/reanigitor.jar --help
 
 ## Usage
 
+You need [Ollama](https://ollama.com) running on this machine with a Gemma model:
+
 ```sh
-java -jar target/reanigitor.jar <github-username> [--months N] [--max N]
+ollama pull gemma4:e4b-it-qat
+java -jar target/reanigitor.jar <github-username> [options]
 ```
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `--months N` | 12 | a repo is abandoned after N months without a push |
+| `--max N` | 12 | bury at most N repos, the longest dead first |
+| `--lang en\|es` | `en` | language of the calaveritas |
+| `--model NAME` | `gemma4:e4b-it-qat` | any local Ollama model |
+| `--out DIR` | `output` | where `<user>/graves.json` is written |
+
+For each repo the local model writes an autopsy (cause of death, epitaph and a three-step
+resurrection prophecy) and a calaverita. It answers in JSON that must match a schema; the
+code validates it, and the model never gets tools. Repo data is wrapped in a `<repo>` block
+and treated as untrusted evidence, never as instructions.
 
 A repo is **abandoned** when it is the user's own (not a fork) and has had no push for
 more than `--months` months (12 by default). ReaniGITor buries the `--max` longest dead
