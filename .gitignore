@@ -1,0 +1,21 @@
+# Secrets: NEVER commit
+.env
+.env.*
+!.env.example
+
+# Generated cemetery and audio
+output/
+
+# Maven
+target/
+
+# Local agent settings and installed skills (pinned in skills-lock.json)
+.claude/
+.agents/
+
+# IDEs and OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
