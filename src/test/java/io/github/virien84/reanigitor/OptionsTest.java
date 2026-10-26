@@ -1,6 +1,7 @@
 package io.github.virien84.reanigitor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -40,6 +41,8 @@ class OptionsTest {
         assertEquals(Lang.EN, defaults.lang());
         assertEquals("gemma4:e4b-it-qat", defaults.model());
         assertEquals(Path.of("output"), defaults.out());
+        assertFalse(defaults.redraw());
+        assertTrue(Options.parse("ghost", "--redraw").redraw());
 
         Options options = Options.parse("ghost", "--lang", "ES", "--model", "gemma4:e2b", "--out", "graves");
         assertEquals(Lang.ES, options.lang());

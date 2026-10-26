@@ -1,0 +1,307 @@
+:root {
+  --night: #1e1433;
+  --night-deep: #150d26;
+  --dusk: #2c1d47;
+  --stone: #cbb2a6;
+  --stone-shade: #a98d82;
+  --engrave: #5e433d;
+  --marigold: #f2a20c;
+  --marigold-deep: #d9780a;
+  --rosa: #e4007c;
+  --turquoise: #14a3a0;
+  --candle: #ffe3a3;
+  --text: #ede3f2;
+  --muted: #b8a7c7;
+  --display: "Sancreek", "Rockwell Extra Bold", Georgia, serif;
+  --body: "Alegreya", Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: dark; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse 90% 40% at 50% 0%, var(--dusk) 0%, transparent 70%),
+    var(--night);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 1.1875rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--marigold); text-underline-offset: 0.18em; }
+a:hover { color: var(--candle); }
+a:focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; border-radius: 2px; }
+
+/* Papel picado: a string of cut tissue-paper flags across the top. */
+.papel {
+  display: block;
+  width: 100%;
+  height: 150px;
+  filter: drop-shadow(0 6px 6px rgb(0 0 0 / 0.35));
+}
+
+.hero {
+  padding: 0 1rem 2rem;
+  text-align: center;
+}
+
+.hero h1 {
+  margin: 2.5rem auto 1rem;
+  max-width: 20ch;
+  text-wrap: balance;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 8vw, 5.4rem);
+  line-height: 1.02;
+  color: var(--marigold);
+  text-shadow: 0 0 28px rgb(242 162 12 / 0.35), 0 3px 0 var(--rosa);
+}
+
+.hero h1 .user { display: block; color: var(--candle); }
+
+.lede {
+  margin: 0 auto;
+  max-width: 34em;
+  color: var(--muted);
+}
+
+/* The path of marigold petals runs down the middle of the cemetery. */
+.path {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.path::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 18px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 30% 30%, var(--marigold) 0 4px, transparent 5px) 0 0 / 18px 26px,
+    radial-gradient(circle at 70% 70%, var(--marigold-deep) 0 3px, transparent 4px) 0 0 / 18px 34px;
+  opacity: 0.8;
+}
+
+.grave {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "plot wake";
+  gap: 4.5rem;
+  align-items: start;
+  margin-bottom: 6rem;
+}
+
+.grave:nth-child(even) { grid-template-areas: "wake plot"; }
+
+.plot {
+  grid-area: plot;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: sticky;
+  top: 2rem;
+}
+
+.stone {
+  position: relative;
+  width: min(100%, 320px);
+  min-height: var(--stone-h, 280px);
+  padding: 3.2rem 1.6rem 2rem;
+  border-radius: 160px 160px 6px 6px;
+  background:
+    radial-gradient(circle at 20% 30%, rgb(255 255 255 / 0.10) 0 1px, transparent 2px) 0 0 / 23px 19px,
+    radial-gradient(circle at 60% 70%, rgb(70 40 40 / 0.12) 0 1px, transparent 2px) 0 0 / 17px 29px,
+    linear-gradient(160deg, #d8c2b7 0%, var(--stone) 45%, var(--stone-shade) 100%);
+  box-shadow: inset -10px -14px 24px rgb(80 50 50 / 0.28), 0 18px 30px rgb(0 0 0 / 0.45);
+  color: var(--engrave);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.stone > * { margin: 0; text-shadow: 0 1px 0 rgb(255 255 255 / 0.4); }
+
+.stone .rip {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+
+.stone h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.stone .dates { font-size: 1.05rem; font-variant-numeric: lining-nums; }
+
+.stone .epitaph {
+  font-style: italic;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+/* Candles and marigolds at the foot of each stone. */
+.ofrenda {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.9rem;
+  width: min(100%, 360px);
+  height: 64px;
+  margin-top: -6px;
+  padding: 0 1rem 6px;
+  border-radius: 4px;
+  background: linear-gradient(#3b2a52, #2a1d3d);
+}
+
+.candle {
+  position: relative;
+  width: 14px;
+  height: var(--h, 34px);
+  border-radius: 2px 2px 1px 1px;
+  background: linear-gradient(90deg, #f4ead8, #fff8ea 40%, #d9c9ad);
+}
+
+.candle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 10px;
+  height: 18px;
+  margin-left: -5px;
+  border-radius: 50% 50% 45% 45% / 65% 65% 35% 35%;
+  background: radial-gradient(ellipse at 50% 70%, #fff 0 18%, var(--candle) 35%, var(--marigold) 70%, transparent 72%);
+  box-shadow: 0 0 18px 6px rgb(255 200 90 / 0.35);
+  transform-origin: 50% 100%;
+  animation: flicker 2.6s infinite alternate ease-in-out;
+}
+
+.candle:nth-child(3n)::before { animation-duration: 1.9s; }
+.candle:nth-child(4n)::before { animation-delay: -0.8s; }
+
+.flower {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--marigold-deep) 0 22%, transparent 24%),
+    conic-gradient(from 10deg, var(--marigold) 0 10%, #ffb627 0 20%, var(--marigold) 0 30%, #ffb627 0 40%,
+      var(--marigold) 0 50%, #ffb627 0 60%, var(--marigold) 0 70%, #ffb627 0 80%, var(--marigold) 0 90%, #ffb627 0);
+}
+
+@keyframes flicker {
+  0% { transform: scale(1, 1) rotate(-2deg); opacity: 0.95; }
+  50% { transform: scale(0.92, 1.08) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1.04, 0.94) rotate(-1deg); opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candle::before { animation: none; }
+}
+
+/* The wake: what the coroner and the poet wrote. */
+.wake {
+  grid-area: wake;
+  max-width: 36em;
+}
+
+.grave:nth-child(even) .wake { justify-self: end; }
+
+.wake h3 {
+  margin: 2rem 0 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--marigold);
+}
+
+.calaverita h3 {
+  margin-top: 0;
+  font-style: italic;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  color: var(--candle);
+}
+
+.verses {
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--rosa);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.55;
+}
+
+.verses span { display: block; }
+.verses span:nth-child(4n) { margin-bottom: 0.8rem; }
+.verses span:last-child { margin-bottom: 0; }
+
+.wake p { margin: 0; }
+
+.prophecy {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.prophecy li { padding-left: 0.3rem; margin-bottom: 0.35rem; }
+.prophecy li::marker { color: var(--turquoise); font-weight: 700; }
+
+.facts {
+  margin-top: 2rem !important;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.stock {
+  margin-top: 1rem !important;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+.empty {
+  max-width: 30em;
+  margin: 3rem auto;
+  text-align: center;
+  color: var(--muted);
+}
+
+footer {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 760px) {
+  body { font-size: 1.0625rem; }
+  .path::before { left: 1.4rem; }
+  .grave,
+  .grave:nth-child(even) {
+    grid-template-columns: 1fr;
+    grid-template-areas: "plot" "wake";
+    gap: 2rem;
+    margin-bottom: 4rem;
+    padding-left: 2rem;
+  }
+  .plot { position: static; }
+  .grave:nth-child(even) .wake { justify-self: start; }
+  .stone { min-height: calc(var(--stone-h, 280px) * 0.85); }
+}

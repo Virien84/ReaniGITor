@@ -52,9 +52,20 @@
   <build>
     <finalName>reanigitor</finalName>
     <resources>
+      <!-- Only the version file is filtered: the CSS has @media rules Maven could mangle. -->
       <resource>
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
+        <includes>
+          <include>reanigitor.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>reanigitor.properties</exclude>
+        </excludes>
       </resource>
     </resources>
     <plugins>

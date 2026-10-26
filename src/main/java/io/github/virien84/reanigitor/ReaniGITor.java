@@ -1,5 +1,6 @@
 package io.github.virien84.reanigitor;
 
+import io.github.virien84.reanigitor.cemetery.Cemetery;
 import io.github.virien84.reanigitor.github.AbandonmentPolicy;
 import io.github.virien84.reanigitor.github.GitHubClient;
 import io.github.virien84.reanigitor.github.GitHubException;
@@ -19,6 +20,7 @@ import java.io.PrintStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
@@ -49,6 +51,8 @@ public final class ReaniGITor {
               --lang en|es   language of the calaveritas (default en)
               --model NAME   Ollama model (default gemma4:e4b-it-qat)
               --out DIR      output folder (default output)
+              --redraw       draw the cemetery again from the saved graves.json,
+                             without calling GitHub or the model
 
             GITHUB_TOKEN (environment or .env) is optional: it raises the GitHub API
             limit from 60 to 5,000 requests per hour.
@@ -101,6 +105,10 @@ public final class ReaniGITor {
             err.print(USAGE);
             return USAGE_ERROR;
         }
+        Path dir = options.out().resolve(options.user());
+        if (options.redraw()) {
+            return redraw(dir, out, err);
+        }
         try {
             GitHubClient github = new GitHubClient(githubApi, githubToken);
             AbandonmentPolicy policy = new AbandonmentPolicy(options.months(), clock);
@@ -132,16 +140,33 @@ public final class ReaniGITor {
                 printGrave(out, grave, Duration.between(start, Instant.now(clock)));
             }
 
-            Path file = options.out().resolve(options.user()).resolve(Graveyard.FILE_NAME);
-            new Graveyard(options.user(), clock.instant(), options.months(), options.model(), options.lang(), graves)
-                    .write(file);
-            out.printf("%nBuried %d repos in %s%n", graves.size(), file);
+            Graveyard graveyard = new Graveyard(options.user(), clock.instant(), options.months(),
+                    options.model(), options.lang(), graves);
+            graveyard.write(dir.resolve(Graveyard.FILE_NAME));
+            Path page = Cemetery.write(graveyard, dir);
+            out.printf("%nBuried %d repos. Open the cemetery: %s%n", graves.size(), page.toAbsolutePath());
             return OK;
         } catch (GitHubException | OllamaException e) {
             err.println(e.getMessage());
             return FAILURE;
         } catch (IOException e) {
             err.println("Could not write the graveyard: " + e.getMessage());
+            return FAILURE;
+        }
+    }
+
+    private static int redraw(Path dir, PrintStream out, PrintStream err) {
+        Path file = dir.resolve(Graveyard.FILE_NAME);
+        if (!Files.isRegularFile(file)) {
+            err.println("There is no " + file + " to redraw. Run it once without --redraw.");
+            return FAILURE;
+        }
+        try {
+            Path page = Cemetery.write(Graveyard.read(file), dir);
+            out.println("Cemetery redrawn: " + page.toAbsolutePath());
+            return OK;
+        } catch (IOException e) {
+            err.println("Could not redraw the cemetery: " + e.getMessage());
             return FAILURE;
         }
     }

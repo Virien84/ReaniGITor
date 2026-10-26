@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.virien84.reanigitor.cemetery.Cemetery;
 import io.github.virien84.reanigitor.github.FakeGitHub;
 import io.github.virien84.reanigitor.github.GitHubClientTest;
 import io.github.virien84.reanigitor.ollama.JsonChat;
@@ -14,6 +15,7 @@ import io.github.virien84.reanigitor.wake.Lang;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
@@ -112,6 +114,32 @@ class ReaniGITorTest {
             assertEquals(1, graveyard.graves().size());
             assertEquals("TODO: live", graveyard.graves().get(0).autopsy().epitaph());
             assertTrue(out().contains("TODO: live"), out());
+            String html = Files.readString(outDir.resolve("ghost").resolve(Cemetery.FILE_NAME));
+            assertTrue(html.contains("TODO: live"), html);
+        }
+    }
+
+    @Test
+    void redrawsTheCemeteryFromTheSavedGraves() throws Exception {
+        try (FakeGitHub github = new FakeGitHub()) {
+            github.on(REPOS, 200, "[" + GitHubClientTest.repoJson("tomb", "2020-01-01T00:00:00Z") + "]");
+            assertEquals(0, runAgainst(github, "ghost"));
+            Path html = outDir.resolve("ghost").resolve(Cemetery.FILE_NAME);
+            Files.delete(html);
+            int requests = github.requests.size();
+
+            assertEquals(0, runAgainst(github, "ghost", "--redraw"));
+
+            assertTrue(Files.exists(html));
+            assertEquals(requests, github.requests.size(), "a redraw never calls GitHub");
+        }
+    }
+
+    @Test
+    void redrawWithoutSavedGravesSaysWhatToDo() throws Exception {
+        try (FakeGitHub github = new FakeGitHub()) {
+            assertEquals(1, runAgainst(github, "ghost", "--redraw"));
+            assertTrue(err().contains("Run it once without --redraw"), err());
         }
     }
 

@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 /** Parsed command-line options. */
-public record Options(String user, int months, int max, Lang lang, String model, Path out) {
+public record Options(String user, int months, int max, Lang lang, String model, Path out, boolean redraw) {
 
     static final int DEFAULT_MONTHS = 12;
     static final int DEFAULT_MAX = 12;
@@ -23,6 +23,7 @@ public record Options(String user, int months, int max, Lang lang, String model,
         Lang lang = Lang.EN;
         String model = OllamaClient.DEFAULT_MODEL;
         Path out = DEFAULT_OUT;
+        boolean redraw = false;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch (arg) {
@@ -42,6 +43,7 @@ public record Options(String user, int months, int max, Lang lang, String model,
                     }
                 }
                 case "--out" -> out = Path.of(value(arg, args, ++i));
+                case "--redraw" -> redraw = true;
                 default -> {
                     if (arg.startsWith("-")) {
                         throw new UsageException("Unknown option: " + arg);
@@ -59,7 +61,7 @@ public record Options(String user, int months, int max, Lang lang, String model,
         if (user == null) {
             throw new UsageException("Missing the GitHub username");
         }
-        return new Options(user, months, max, lang, model, out);
+        return new Options(user, months, max, lang, model, out, redraw);
     }
 
     private static String value(String option, String[] args, int index) {
