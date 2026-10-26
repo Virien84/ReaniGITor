@@ -84,7 +84,8 @@ the start of a new session (after `/clear`):
   building URLs, cleans every text field with `Text.clean` (control and bidi characters
   removed, length capped: README 3000, description 300, commit 200, issue 120 chars) and
   turns 404/409 into "nothing there" and rate limits into a clear `GitHubException`.
-  `AbandonmentPolicy`: not a fork and no push for more than `--months` (default **12**);
+  `AbandonmentPolicy`: not a fork, not the profile README repo (named like its owner),
+  and no push for more than `--months` (default **12**);
   `select` returns the longest dead first, at most `--max` (default **12**). Cost per run:
   repo pages + up to 3 requests per buried repo (README, last commit, open issues, the last
   one skipped when there are none), so 12 repos fit in the anonymous 60/hour.
@@ -102,7 +103,9 @@ the start of a new session (after `/clear`):
   `output/<user>/graves.json` (Jackson + JavaTimeModule) so the HTML can be redrawn without
   the model. Prompt tuning notes: couplets rhyme far better than ABAB in Spanish; telling
   the model "roast, not an elegy", banning solemn words and generic diagnoses
-  ("stagnation") made it funnier. About 33 s per repo with `gemma4:e4b-it-qat`.
+  ("stagnation") made it funnier. The coroner only sees metadata, so the prompt forbids
+  claiming the code is missing or broken without evidence (it used to say so and then
+  prophesy "implement the core logic" for working repos). About 33 s per repo with `gemma4:e4b-it-qat`.
 - **Cemetery** (`cemetery` package): `Cemetery.render` writes `output/<user>/index.html`
   (static, no JavaScript, CSP `default-src 'none'` with only inline styles, Google Fonts
   and `media-src 'self'` allowed). Every repo/model string goes through `Cemetery.escape`;
