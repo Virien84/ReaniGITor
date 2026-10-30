@@ -1,10 +1,11 @@
 ## CAMBIOS
 
 - (Opcional) ElevenLabs, pasos del usuario: crear cuenta y reclamar créditos en hacktoberfest.com/my, ejecutar `npx -y @elevenlabs/cli@latest onboard init` en la carpeta del proyecto (guarda la key) y dar permiso para grabar con `java -jar target/reanigitor.jar Virien84 --out output/es --narrate` (~810 caracteres + 22 s de ambiente). Luego revisar cómo suena.
-- Revisar el borrador del post en DEV (https://dev.to/virien84/reanigitor-a-dia-de-los-muertos-wake-for-my-abandoned-github-repos-written-by-gemma-on-my-own-1d9i-temp-slug-6773330/edit) y publicarlo antes del 31/10/2026 a las 06:59 UTC (Claude solo publica con un sí explícito). Si se graba la narración con ElevenLabs, añadir la categoría «Best Use of ElevenLabs» y un audio de muestra.
 
 ## HECHO
 
+- ✅ 30/10/2026 · Publicar el post en DEV antes del 31/10/2026 a las 06:59 UTC.
+  → Publicado por el usuario: https://dev.to/virien84/reanigitor-a-dia-de-los-muertos-wake-for-my-abandoned-github-repos-written-by-gemma-on-my-own-1ajp (categoría Best Use of Gemma).
 - ✅ 30/10/2026 · Revisar el borrador del post, publicar la sesión 1250 en DEV y borrar las sesiones de prueba 1248 y 1249.
   → Añadida al post la calaverita completa de intro-to-git (con nota de licencia poética: el repo no tiene issues), tiempos unificados (~35 s por tumba, ~7 min para 12) e inglés americano. El usuario publicó la sesión 1250 (la API no lo permite) y borró la 1248 y la 1249.
 
